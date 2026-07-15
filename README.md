@@ -1,4 +1,4 @@
-# Mini Project — Library Database: Entity/Relationship Draft (v0)
+# Mini Project — Library Database: Entity/Relationship Draft
 
 ---
 
@@ -38,7 +38,7 @@
   - Weak key: loanID
   - Attributes: amountOwed, dateIssued, datePaid (nullable), status (Unpaid/Paid/Waived)
 
-## 4. Relationships — varied multiplicity/participation
+## 4. Relationships
 
 | Relationship | Participants | Multiplicity | Participation |
 |---|---|---|---|
@@ -53,18 +53,24 @@
 
 ---
 
-## 5. Open questions to confirm with the team
+## 5. Team Task Split
 
-- [ ] Should Item really be split into these 5 isa subclasses, or would a single `type` attribute be simpler? (isa better demonstrates "entity/relationship variety," but adds 5+1 tables in Step 4)
-- [ ] Should we keep all 3 Person subclasses (Member/Staff/Volunteer), or cut down to 2 (Member/Staff) if time is short?
-- [ ] Should Loan be modeled as a weak entity, or would a plain entity with a surrogate key (loanID) be simpler? (Either works, as long as it's justified in the Step 3 BCNF proof.)
-- [ ] Should Event subtypes (BookClub/ArtShow/FilmScreening) also be isa subclasses, or is an `eventType` attribute enough? (We already used isa twice for Person and Item, so keeping Event as an attribute is probably enough for the variety requirement.)
-- [ ] How should an AcquisitionCandidate that gets approved turn into an actual Item? (Likely just application logic — shouldn't affect the DB design much.)
-- [ ] Is there anything more complex than necessary? (Design principle from Module 4: Simplicity — don't over-engineer.)
+Split by domain, not by step — each person owns their half end-to-end.
+
+- **Person A**: Item (+ subclasses: PrintBook/OnlineBook/Magazine/Journal/Recording) / Loan / Fine / AcquisitionCandidate
+- **Person B**: Person (+ subclasses: Member/Staff/Volunteer) / Event / Room / AudienceGroup / Attends
+
+Overlap points both people need to agree on: Person↔Loan (Borrows), Person↔Attends, Item↔DonatedBy (Person side).
+
+| Step | Person A | Person B | Do together |
+|---|---|---|---|
+| 1. Specs | Write item/borrowing/fine/acquisition paragraphs | Write people/event/room paragraphs | Merge into one doc |
+| 2. ERD | Draw Item cluster sub-diagram | Draw Person/Event cluster sub-diagram | Merge diagrams at the 3 overlap points above |
+| 3. BCNF | Find FDs + BCNF proof for Item cluster tables | Find FDs + BCNF proof for Person cluster tables | Check FDs that cross the overlap relationships together |
+| 4. SQL Schema | Write CREATE TABLE + constraints for their tables | Same for their tables | Agree on FK naming/types before either starts |
+| 5. Populate | Insert ≥10 rows for their tables | Insert ≥10 rows for their tables | Make sure FK values reference real rows on both sides |
+| 6. App (after Jul 20) | Implement: find item, borrow, return, donate | Implement: find event, register, volunteer, ask librarian | Integrate into one app, shared DB connection code |
 
 ## 6. Next steps
-1. Agree on the checklist above → split Step 2 (drawing the ERD) by domain:
-   - **Person A**: Item (+ subclasses) / Loan / Fine / AcquisitionCandidate
-   - **Person B**: Person (+ subclasses) / Event / Room / AudienceGroup / Attends
-2. Each person draws their sub-diagram, then merge them (overlap points: Person↔Loan, Person↔Attends, Item↔DonatedBy)
-3. Proceed to Step 3 (FD/BCNF proof) using the merged ERD
+1. Split Step 2 (ERD) per the table above; each person draws their sub-diagram.
+2. Merge diagrams at the overlap points, then proceed to Step 3 (BCNF) using the merged ERD.
