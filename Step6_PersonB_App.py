@@ -4,10 +4,11 @@ ask a librarian. Connects to library.db (built by build_db.py from both Step4/St
 All SQL uses parameterized queries (never string-formats user input into SQL).
 Every menu action commits on success and rolls back on any sqlite3.Error.
 """
+import os
 import sqlite3
 from datetime import date
 
-DB_FILE = "library.db"
+DB_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "library.db")
 
 
 def connect():
@@ -17,9 +18,10 @@ def connect():
 
 
 def next_person_id(cur):
-    cur.execute("SELECT personID FROM Person ORDER BY personID DESC LIMIT 1")
-    row = cur.fetchone()
-    n = int(row[0][1:]) + 1 if row else 1
+    # Take the numeric max, not the textual one: 'P999' sorts after 'P1000' as text,
+    # which would regenerate an existing ID once past P999.
+    cur.execute("SELECT MAX(CAST(SUBSTR(personID, 2) AS INTEGER)) FROM Person")
+    n = (cur.fetchone()[0] or 0) + 1
     return f"P{n:03d}"
 
 
