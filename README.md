@@ -1,4 +1,4 @@
-# Mini Project — Library Database: Entity/Relationship Draft
+# Mini Project: Library Database (Entity/Relationship Draft)
 
 ---
 
@@ -31,10 +31,10 @@
 
 ## 3. Weak Entities
 
-- **Loan** — a weak entity that depends on both Member and Item (the same person can borrow the same item multiple times over separate periods, so a plain relationship isn't enough — each borrowing event needs its own instance).
+- **Loan**: a weak entity that depends on both Member and Item (the same person can borrow the same item multiple times over separate periods, so a plain relationship isn't enough; each borrowing event needs its own instance).
   - Weak key: (personID, itemID, loanDate), or a surrogate loanID
   - Attributes: dueDate, returnDate (nullable), status
-- **Fine** — a weak entity that depends on Loan (only exists for an overdue loan, 1:1 and optional).
+- **Fine**: a weak entity that depends on Loan (only exists for an overdue loan, 1:1 and optional).
   - Weak key: loanID
   - Attributes: amountOwed, dateIssued, datePaid (nullable), status (Unpaid/Paid/Waived)
 
@@ -55,7 +55,7 @@
 
 ## 5. Team Task Split
 
-Split by domain, not by step — each person owns their half end-to-end.
+Split by domain, not by step. Each person owns their half end-to-end.
 
 - **Person A**: Item (+ subclasses: PrintBook/OnlineBook/Magazine/Journal/Recording) / Loan / Fine / AcquisitionCandidate
 - **Person B**: Person (+ subclasses: Member/Staff/Volunteer) / Event / Room / AudienceGroup / Attends
