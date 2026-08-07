@@ -61,6 +61,10 @@ def diamond(name, cx, cy, label, w=2.4, h=1.2, dbl=False, fontsize=9):
     ax.text(cx, cy, label, ha='center', va='center', fontsize=fontsize, fontweight='bold')
     SHAPES[name] = (cx, cy, w, h, 'diamond')
 
+def caption(cx, cy, text, fontsize=7.5):
+    ax.text(cx, cy, text, ha='center', va='center', fontsize=fontsize,
+            style='italic', color='dimgray')
+
 def tri(name, cx, cy, w=1.4, h=1.0):
     pts = [(cx, cy+h/2), (cx+w/2, cy-h/2), (cx-w/2, cy-h/2)]
     ax.add_patch(mpatches.Polygon(pts, closed=True, fill=False, lw=1.5, ec='black'))
@@ -116,16 +120,19 @@ oval('p_addr', 12.7, 10.4, 'address');           connect('p_addr', 'Person')
 
 # ============ Touch-points with Person A's domain (dashed placeholders) ============
 rect('ItemPh', 1.7, 13.8, 'Item', w=2.0, h=1.0, dashed=True)
+caption(1.7, 13.0, "see Person A's diagram")
 diamond('DonatedBy', 4.5, 13.1, 'DonatedBy', w=2.4, h=1.0)
 connect('DonatedBy', 'ItemPh')
 connect('DonatedBy', 'Person', arrow=True)
 
 rect('LoanPh', 1.7, 11.3, 'Loan', w=2.0, h=1.0, dashed=True)
+caption(1.7, 10.5, "see Person A's diagram")
 diamond('By', 4.5, 11.5, 'By', w=2.2, h=1.0, dbl=True)
 connect('By', 'LoanPh')
 connect('By', 'Person', arrow=True)
 
 rect('ACPh', 1.7, 8.9, 'Acquisition\nCandidate', w=2.4, h=1.1, dashed=True)
+caption(1.7, 8.05, "see Person A's diagram")
 diamond('Suggested', 4.6, 9.7, 'Suggested', w=2.2, h=1.0)
 connect('Suggested', 'ACPh')
 connect('Suggested', 'Person', arrow=True)

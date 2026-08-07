@@ -4,7 +4,7 @@
 
 Same conversion rules as Person A's half. Each strong entity set becomes its own relation. The isa
 hierarchy uses **Strategy 1 (straight E/R)**: one relation per subclass holding the root key plus its
-own attributes — the right fit here because the hierarchy is overlapping + partial, so a person can
+own attributes: the right fit here because the hierarchy is overlapping + partial, so a person can
 appear in several subclass relations or in none. Many-one relationships (`HeldIn`, `Supervises`) are
 folded into the "many" side's relation: `HeldIn` becomes a NOT NULL `roomID` in Event (total
 participation), and `Supervises` becomes a nullable `supervisorID` in Staff (the head of the library
@@ -31,7 +31,7 @@ by the pair of participating keys.
   email and no two people share one, since email is how the library reaches a person about loans,
   fines, and registrations)
 
-**Candidate keys:** {personID}, and also **{email}** — a second, non-obvious candidate key: from
+**Candidate keys:** {personID}, and also **{email}**, a second, non-obvious candidate key: from
 email → personID and personID → everything, transitively email⁺ = all attributes. The schema
 enforces it with NOT NULL UNIQUE on email.
 
@@ -66,7 +66,7 @@ than personID determines anything.
 **Candidate key:** {personID}. **BCNF check:** only FD has a key on the left. **Already BCNF.**
 
 *Alternative assumption and where it would break:* if the library instead paid on a rigid scale
-where the job title fixes the pay, role → salary would hold with role not a superkey — a **BCNF
+where the job title fixes the pay, role → salary would hold with role not a superkey: a **BCNF
 violation** (salary would be repeated on every staff row with that role: update anomaly). The
 decomposition would be **RolePay**(role, salary) with PK = role, and
 **Staff**(personID, role, hireDate, supervisorID) with an FK on role → RolePay. That join is
@@ -89,7 +89,7 @@ design because it matches how the spec describes staff pay.
 
 *Assumption:* room names are **not** assumed unique (a future branch or renovation could produce two
 "Meeting Room A"s), so name → roomID is not claimed. If names were assumed unique, {name} would be
-another candidate key — and the relation would still be in BCNF, since name would then be a key.
+another candidate key, and the relation would still be in BCNF, since name would then be a key.
 capacity determines nothing (many rooms can seat 20).
 
 **Candidate key:** {roomID}. **Already BCNF.**
@@ -103,7 +103,7 @@ capacity determines nothing (many rooms can seat 20).
 - **{roomID, eventDate, startTime} → eventID** (real-world rule from the Step 1 spec: a room cannot
   be double-booked, so at most one event occupies a given room at a given date and start time)
 
-**Candidate keys:** {eventID}, and also **{roomID, eventDate, startTime}** — the second, non-obvious
+**Candidate keys:** {eventID}, and also **{roomID, eventDate, startTime}**, the second, non-obvious
 candidate key: it determines eventID, and eventID determines everything else, so its closure is all
 attributes. The schema enforces it with UNIQUE(roomID, eventDate, startTime) (and the no-overlap
 trigger enforces the stronger interval version of the rule).
@@ -112,7 +112,7 @@ trigger enforces the stronger interval version of the rule).
 
 *Alternative assumption and where it would break:* the analysis does not assume anything like
 "every BookClub lasts 90 minutes". If eventType → duration were real, endTime would be determined
-by {eventType, startTime}, a non-superkey determinant — a BCNF violation whose fix would be
+by {eventType, startTime}, a non-superkey determinant: a BCNF violation whose fix would be
 **TypeDuration**(eventType, duration) with endTime dropped from Event and recomputed on the join.
 Event lengths genuinely vary here (Step 5 has 60-, 90-, and 360-minute events), so no such FD holds.
 
@@ -127,7 +127,7 @@ Single-attribute relation; only trivial FDs exist. **Candidate key:** {groupName
 
 ## 8. RecommendedFor(eventID, groupName)
 
-**FDs:** none that are non-trivial — the relation is all key. An event can be recommended for many
+**FDs:** none that are non-trivial: the relation is all key. An event can be recommended for many
 groups and a group can have many events, so neither attribute determines the other.
 
 **Candidate key:** {eventID, groupName}. **BCNF check:** a relation with no non-trivial FDs cannot
@@ -154,12 +154,12 @@ Both hang off Event, so one could imagine a single combined relation
 R(eventID, groupName, personID, registrationDate). That design is wrong because the two facts are
 **independent**: which audience groups an event is aimed at has nothing to do with which individual
 people have registered. In the combined relation this independence shows up as the multivalued
-dependencies eventID ↠ groupName and eventID ↠ {personID, registrationDate} — a 4NF violation even
+dependencies eventID ↠ groupName and eventID ↠ {personID, registrationDate}, a 4NF violation even
 though no FD is violated. Concretely, an event recommended for 2 groups with 5 registrants needs
 2 × 5 = 10 rows to stay consistent instead of 2 + 5 = 7, every new registrant must be repeated once
 per group (redundancy + update anomaly), and an event with recommendations but no registrants yet
 (or vice versa) forces NULLs into half the key. Keeping the two many-many relationships as separate
-relations — exactly as the ERD draws them — avoids all of this.
+relations, exactly as the ERD draws them, avoids all of this.
 
 ---
 
@@ -178,6 +178,6 @@ Attends(personID, eventID, registrationDate)
 ```
 
 No decomposition was needed: every non-trivial FD in this cluster already has a candidate key on
-its left side. The two extra candidate keys found along the way — Person.{email} and
-Event.{roomID, eventDate, startTime} — are declared as UNIQUE constraints in Step 4 so the schema
+its left side. The two extra candidate keys found along the way, Person.{email} and
+Event.{roomID, eventDate, startTime}, are declared as UNIQUE constraints in Step 4 so the schema
 actually enforces what this analysis claims.

@@ -1,6 +1,6 @@
--- Step 5 — Populate Tables (Person A: Item / Loan / Fine / AcquisitionCandidate)
--- Run after Step4_PersonA_Schema.sql. personID values (P001..) are placeholders
--- until merged with Person B's Person/Member table.
+-- Step 5: Populate Tables (Person A: Item / Loan / Fine / AcquisitionCandidate)
+-- Run after Step4_PersonA_Schema.sql and Step5_PersonB_Data.sql. personID values
+-- (P001..) reference real rows in Person B's Person/Member table; see Integration_Notes.md.
 
 -- ==== Book (12 rows; a few ISBNs are reused by multiple copies below) ====
 INSERT INTO Book (ISBN, author, publisher) VALUES

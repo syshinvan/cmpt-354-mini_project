@@ -17,7 +17,7 @@ querying every distinct personID that Person A's data references:
 - **P001–P010, P020–P025 all exist in `Person`** (16 IDs, part of a 30-person roster).
 - **P001–P010 are also `Member` rows**, because they borrow: we agreed Borrows follows
   README §3/§4, so `Loan.personID` references **Member**, not Person. (Person A's inline
-  comment on `Loan.personID` says "FK -> Person" — that comment is the out-of-date side
+  comment on `Loan.personID` says "FK -> Person"; that comment is the out-of-date side
   of the disagreement; see the edit below.)
 
 ## 2. Exact edits to enable Person A's three foreign keys
@@ -32,7 +32,7 @@ FK needs a trailing comma when the FK becomes a real constraint.
     FOREIGN KEY (donatedBy) REFERENCES Person(personID)
 ```
 
-**Loan.personID** (lines 77–78) — note this references `Member`, per README §3/§4
+**Loan.personID** (lines 77–78): note this references `Member`, per README §3/§4
 (Loan is a weak entity supported by Member; only members can borrow):
 
 ```sql
@@ -70,7 +70,7 @@ once the FKs above are enabled.
 ## 4. Housekeeping
 
 - `library.db` is a build artifact: it is now in `.gitignore` and was removed from git
-  tracking (the working copy is untouched — rebuild any time with `python3 build_db.py`).
+  tracking (the working copy is untouched; rebuild any time with `python3 build_db.py`).
 - `Step2_PersonA_ERD.py` writes its output to a hardcoded absolute path
   (`/Users/seungyeopshin/Desktop/...`), so it crashes on other machines. Suggested fix,
   mirroring `Step2_PersonB_ERD.py`: derive the output directory from

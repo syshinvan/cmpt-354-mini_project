@@ -2,9 +2,11 @@
 Step 2 ERD - Item (+5 isa subclasses), Loan, Fine, AcquisitionCandidate.
 Notation: rectangle=entity, double-rectangle=weak entity, oval=attribute, diamond=relationship,
 double-diamond=identifying relationship, solid/dashed underline=key/partial key.
-Person/Member boxes are dashed placeholders for Person B's domain.
+Person/Member boxes are dashed placeholders for Person B's domain (each labeled with
+the specific entity its FK targets, per Integration_Notes.md).
 """
 import math
+import os
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle, Ellipse
 import matplotlib.patches as mpatches
@@ -57,6 +59,10 @@ def diamond(name, cx, cy, label, w=2.4, h=1.2, dbl=False, fontsize=9):
         ax.add_patch(mpatches.Polygon(pts2, closed=True, fill=False, lw=1.1, ec='black'))
     ax.text(cx, cy, label, ha='center', va='center', fontsize=fontsize, fontweight='bold')
     SHAPES[name] = (cx, cy, w, h, 'diamond')
+
+def caption(cx, cy, text, fontsize=7.5):
+    ax.text(cx, cy, text, ha='center', va='center', fontsize=fontsize,
+            style='italic', color='dimgray')
 
 def tri(name, cx, cy, w=1.4, h=1.0):
     pts = [(cx, cy+h/2), (cx+w/2, cy-h/2), (cx-w/2, cy-h/2)]
@@ -122,7 +128,8 @@ connect('For', 'Item', arrow=True)
 connect('For', 'Loan')
 
 # DonatedBy: Item -> Person (left side, clear of attributes)
-rect('PersonDonated', 5.0, 11.5, 'Person /\nMember', w=2.4, h=1.2, dashed=True)
+rect('PersonDonated', 5.0, 11.5, 'Person', w=2.4, h=1.2, dashed=True)
+caption(5.0, 10.65, "see Person B's diagram")
 diamond('DonatedBy', 8.2, 11.5, 'DonatedBy', w=2.4, h=1.0)
 connect('DonatedBy', 'Item')
 connect('DonatedBy', 'PersonDonated', arrow=True)
@@ -132,8 +139,9 @@ oval('l_return', 15.0, 7.9, 'returnDate');                 connect('l_return', '
 oval('l_status', 15.0, 7.0, 'status');                     connect('l_status', 'Loan')
 oval('l_due', 15.0, 6.1, 'dueDate');                       connect('l_due', 'Loan')
 
-# By: Loan -> Person/Member (identifying, weak, left side clear of attributes)
-rect('PersonBy', 5.0, 7.4, 'Person /\nMember', w=2.4, h=1.2, dashed=True)
+# By: Loan -> Member (identifying, weak, left side clear of attributes)
+rect('PersonBy', 5.0, 7.4, 'Member', w=2.4, h=1.2, dashed=True)
+caption(5.0, 6.55, "see Person B's diagram")
 diamond('By', 8.2, 7.4, 'By', w=2.4, h=1.0, dbl=True)
 connect('By', 'Loan')
 connect('By', 'PersonBy', arrow=True)
@@ -159,12 +167,14 @@ oval('ac_status', 17.6, 10.7, 'status');                 connect('ac_status', 'A
 oval('ac_dateprop', 17.6, 8.3, 'dateProposed');          connect('ac_dateprop', 'AC')
 
 rect('PersonSuggested', 20, 5.2, 'Person', w=2.0, h=1.0, dashed=True)
+caption(20, 4.45, "see Person B's diagram")
 diamond('Suggested', 20, 7.2, 'Suggested', w=2.2, h=1.0)
 connect('Suggested', 'AC')
 connect('Suggested', 'PersonSuggested', arrow=True)
 
 plt.tight_layout()
-out = '/Users/seungyeopshin/Desktop/CMPT_354/MiniProject/Step2_PersonA_ERD.pdf'
+out_dir = os.path.dirname(os.path.abspath(__file__))
+out = os.path.join(out_dir, 'Step2_PersonA_ERD.pdf')
 plt.savefig(out, bbox_inches='tight')
 plt.savefig(out.replace('.pdf', '.png'), dpi=130, bbox_inches='tight')
 print('saved:', out)

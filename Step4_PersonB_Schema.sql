@@ -1,6 +1,6 @@
--- Step 4 — SQL Schema (Person B: Person + subclasses / Room / Event / AudienceGroup / RecommendedFor / Attends)
+-- Step 4: SQL Schema (Person B: Person + subclasses / Room / Event / AudienceGroup / RecommendedFor / Attends)
 -- Load this file BEFORE Step4_PersonA_Schema.sql: Person A's Item/Loan/AcquisitionCandidate
--- tables reference Person(personID) once their commented-out FKs are enabled.
+-- tables have FKs referencing Person(personID) and Member(personID).
 
 PRAGMA foreign_keys = ON;
 

@@ -3,10 +3,11 @@ Step 6 - Person A's app features: find an item, borrow an item, return an item,
 donate an item. Connects to library.db (built from Step4 schema + Step5 data).
 All SQL uses parameterized queries (never string-formats user input into SQL).
 """
+import os
 import sqlite3
 from datetime import date
 
-DB_FILE = "library.db"
+DB_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "library.db")
 LOAN_PERIOD_DAYS = 14
 FINE_RATE_PER_DAY = 0.50
 

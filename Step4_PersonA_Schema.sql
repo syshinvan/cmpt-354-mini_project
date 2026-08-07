@@ -1,5 +1,5 @@
--- Step 4 — SQL Schema (Person A: Item / Loan / Fine / AcquisitionCandidate)
--- Person/Member are Person B's tables; their FKs are commented out until merged.
+-- Step 4: SQL Schema (Person A: Item / Loan / Fine / AcquisitionCandidate)
+-- Person/Member are Person B's tables. Load order: Person B schema -> this file -> Person B data -> Person A data.
 
 PRAGMA foreign_keys = ON;
 
@@ -12,8 +12,8 @@ CREATE TABLE Item (
     dateAdded           DATE      NOT NULL,
     status              CHAR(15)  NOT NULL DEFAULT 'Available'
                                   CHECK (status IN ('Available','CheckedOut','Lost')),
-    donatedBy           CHAR(20)                          -- FK -> Person, set only if Donated
-    -- FOREIGN KEY (donatedBy) REFERENCES Person(personID)
+    donatedBy           CHAR(20),                         -- FK -> Person, set only if Donated
+    FOREIGN KEY (donatedBy) REFERENCES Person(personID)
 );
 
 CREATE TABLE Book (
@@ -67,15 +67,15 @@ CREATE TABLE Recording (
 
 CREATE TABLE Loan (
     itemID              CHAR(20)  NOT NULL,
-    personID            CHAR(20)  NOT NULL,               -- FK -> Person
+    personID            CHAR(20)  NOT NULL,               -- FK -> Member
     loanDate            DATE      NOT NULL,
     dueDate             DATE      NOT NULL,
     returnDate          DATE,                              -- null until returned
     status              CHAR(15)  NOT NULL DEFAULT 'Active'
                                   CHECK (status IN ('Active','Returned','Overdue')),
     PRIMARY KEY (itemID, personID, loanDate),
-    FOREIGN KEY (itemID) REFERENCES Item(itemID)
-    -- FOREIGN KEY (personID) REFERENCES Person(personID)
+    FOREIGN KEY (itemID) REFERENCES Item(itemID),
+    FOREIGN KEY (personID) REFERENCES Member(personID)
 );
 
 -- ==== Fine (weak entity) ====
@@ -103,8 +103,8 @@ CREATE TABLE AcquisitionCandidate (
                                   CHECK (status IN ('Pending','Approved','Rejected')),
     dateProposed        DATE      NOT NULL,
     estimatedCost       DECIMAL(8,2) CHECK (estimatedCost >= 0),
-    suggestedBy         CHAR(20)                           -- FK -> Person
-    -- FOREIGN KEY (suggestedBy) REFERENCES Person(personID)
+    suggestedBy         CHAR(20),                          -- FK -> Person
+    FOREIGN KEY (suggestedBy) REFERENCES Person(personID)
 );
 
 -- ==== Triggers ====

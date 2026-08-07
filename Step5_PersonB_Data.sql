@@ -1,4 +1,4 @@
--- Step 5 — Populate Tables (Person B: Person + subclasses / Room / Event / AudienceGroup / RecommendedFor / Attends)
+-- Step 5: Populate Tables (Person B: Person + subclasses / Room / Event / AudienceGroup / RecommendedFor / Attends)
 -- Run after Step4_PersonB_Schema.sql (and before Step5_PersonA_Data.sql when merging).
 -- Covers every personID Person A's data references: P001-P010 borrow and get fined
 -- (so they are Members), P001-P007 suggest acquisitions, P020-P025 donate items.
@@ -138,7 +138,7 @@ INSERT INTO RecommendedFor (eventID, groupName) VALUES
 ('E011', 'Teens');
 
 -- ==== Attends (17 rows) ====
--- E011 is at its room's capacity (4 of 4 in the Tutoring Pod) — a 5th registration trips
+-- E011 is at its room's capacity (4 of 4 in the Tutoring Pod): a 5th registration trips
 -- the Attends_Capacity trigger. P025 and P026 attending shows people in no subclass
 -- still interact with the library (partial isa).
 INSERT INTO Attends (personID, eventID, registrationDate) VALUES
