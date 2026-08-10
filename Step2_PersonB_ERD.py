@@ -1,7 +1,8 @@
 """
 Step 2 ERD - Person (+3 isa subclasses), Room, Event, AudienceGroup.
 Notation: rectangle=entity, double-rectangle=weak entity, oval=attribute, diamond=relationship,
-double-diamond=identifying relationship, solid/dashed underline=key/partial key.
+double-diamond=identifying relationship, solid/dashed underline=key/partial key,
+double line = total participation.
 Item/Loan/AcquisitionCandidate boxes are dashed placeholders for Person A's domain
 (the three agreed touch-points: DonatedBy, Borrows/By, Suggested).
 Helper functions are shared with Step2_PersonA_ERD.py so both halves render identically.
@@ -71,7 +72,7 @@ def tri(name, cx, cy, w=1.4, h=1.0):
     ax.text(cx, cy-0.05, 'isa', ha='center', va='center', fontsize=8)
     SHAPES[name] = (cx, cy, w, h, 'rect')
 
-def connect(name1, name2, arrow=False, lw=1.1):
+def connect(name1, name2, arrow=False, lw=1.1, double=False):
     cx1, cy1, w1, h1, k1 = SHAPES[name1]
     cx2, cy2, w2, h2, k2 = SHAPES[name2]
     p1 = _edge_point(cx1, cy1, w1, h1, k1, cx2, cy2)
@@ -79,6 +80,13 @@ def connect(name1, name2, arrow=False, lw=1.1):
     if arrow:
         ax.annotate('', xy=p2, xytext=p1,
                     arrowprops=dict(arrowstyle='-|>', lw=lw+0.3, color='black'), zorder=1)
+    elif double:  # two parallel lines offset perpendicular to the connection
+        dx, dy = p2[0] - p1[0], p2[1] - p1[1]
+        dist = math.hypot(dx, dy)
+        ox, oy = -dy / dist * 0.05, dx / dist * 0.05
+        for s in (1, -1):
+            ax.plot([p1[0] + s * ox, p2[0] + s * ox], [p1[1] + s * oy, p2[1] + s * oy],
+                    color='black', lw=lw, zorder=0)
     else:
         ax.plot([p1[0], p2[0]], [p1[1], p2[1]], color='black', lw=lw, zorder=0)
 
@@ -156,7 +164,7 @@ oval('e_end', 8.9, 3.6, 'endTime');           connect('e_end', 'Event')
 # ============ HeldIn: Event -> Room (many-one, total on Event side) ============
 rect('Room', 16.5, 6.5, 'Room')
 diamond('HeldIn', 12.8, 6.5, 'HeldIn', w=2.3, h=1.0)
-connect('HeldIn', 'Event')
+connect('HeldIn', 'Event', double=True)   # total participation: every event has a room
 connect('HeldIn', 'Room', arrow=True)
 
 oval('r_id', 15.6, 8.2, 'roomID', key=True);  connect('r_id', 'Room')
