@@ -29,6 +29,7 @@ CREATE TABLE Staff (
     salary              DECIMAL(9,2) NOT NULL
                                   CHECK (typeof(salary) IN ('integer','real') AND salary >= 0),
     supervisorID        CHAR(20),                         -- null only for the head of the library
+                                                          -- (uniqueness of that head: Staff_Single_Head_* triggers)
     CHECK (supervisorID IS NULL OR supervisorID <> personID),
     FOREIGN KEY (personID) REFERENCES Person(personID),
     FOREIGN KEY (supervisorID) REFERENCES Staff(personID)
@@ -213,6 +214,33 @@ BEGIN
             SELECT 1 FROM chain WHERE id = NEW.personID
         )
         THEN RAISE(ABORT, 'Error: supervisor assignment would create a cycle!')
+    END;
+END;
+
+-- there is exactly one head of the library (the one Staff row with no supervisor).
+-- A CHECK cannot see other rows and a UNIQUE index ignores NULLs, so at most one
+-- NULL supervisorID needs a trigger on both paths that can introduce a second one.
+CREATE TRIGGER Staff_Single_Head_Insert
+BEFORE INSERT ON Staff
+WHEN NEW.supervisorID IS NULL
+BEGIN
+    SELECT CASE
+        WHEN EXISTS (
+            SELECT 1 FROM Staff WHERE supervisorID IS NULL
+        )
+        THEN RAISE(ABORT, 'Error: the library already has a head (a staff row with no supervisor)!')
+    END;
+END;
+
+CREATE TRIGGER Staff_Single_Head_Update
+BEFORE UPDATE OF supervisorID ON Staff
+WHEN NEW.supervisorID IS NULL
+BEGIN
+    SELECT CASE
+        WHEN EXISTS (
+            SELECT 1 FROM Staff WHERE supervisorID IS NULL AND personID <> NEW.personID
+        )
+        THEN RAISE(ABORT, 'Error: the library already has a head (a staff row with no supervisor)!')
     END;
 END;
 
