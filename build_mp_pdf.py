@@ -183,7 +183,8 @@ pdf.multi_cell(
     0, 5.6,
     "Notation: rectangle = entity set, double rectangle = weak entity set, oval = attribute "
     "(solid underline = key, dashed underline = partial key), diamond = relationship, double "
-    "diamond = identifying relationship, triangle = isa. Dashed boxes are placeholders marking "
+    "diamond = identifying relationship, double line = total participation, triangle = isa. "
+    "Dashed boxes are placeholders marking "
     "where a relationship crosses into the other half's diagram (captioned accordingly); the two "
     "halves share identical relationship names (DonatedBy, By, Suggested) at every crossing point.",
     align="L",
