@@ -68,7 +68,8 @@ CREATE TABLE Event (
 
 CREATE TABLE AudienceGroup (
     groupName           CHAR(10)  PRIMARY KEY
-                                  CHECK (groupName IN ('Kids','Teens','Adults','Seniors','AllAges'))
+                                  CHECK (groupName IN ('Toddlers','Kids','Tweens','Teens','Adults',
+                                                       'Seniors','Families','Newcomers','JobSeekers','AllAges'))
 );
 
 -- ==== RecommendedFor / Attends (many-many relationships) ====
