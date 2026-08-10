@@ -4,7 +4,8 @@ Notation: rectangle=entity, double-rectangle=weak entity, oval=attribute, diamon
 double-diamond=identifying relationship, solid/dashed underline=key/partial key,
 double line = total participation.
 Item/Loan/AcquisitionCandidate boxes are dashed placeholders for Person A's domain
-(the three agreed touch-points: DonatedBy, Borrows/By, Suggested).
+(the three agreed touch-points: DonatedBy, Borrows/By, Suggested); the dashed Member
+box is a placeholder for the Member subclass above (Loan.personID references Member).
 Helper functions are shared with Step2_PersonA_ERD.py so both halves render identically.
 """
 import math
@@ -135,9 +136,10 @@ connect('DonatedBy', 'Person', arrow=True)
 
 rect('LoanPh', 1.7, 11.3, 'Loan', w=2.0, h=1.0, dashed=True)
 caption(1.7, 10.5, "see Person A's diagram")
-diamond('By', 4.5, 11.5, 'By', w=2.2, h=1.0, dbl=True)
+diamond('By', 4.2, 11.5, 'By', w=2.2, h=1.0, dbl=True)
+rect('MemberPh', 6.6, 11.65, 'Member', w=1.8, h=0.85, dashed=True)
 connect('By', 'LoanPh')
-connect('By', 'Person', arrow=True)
+connect('By', 'MemberPh', arrow=True)
 
 rect('ACPh', 1.7, 8.9, 'Acquisition\nCandidate', w=2.4, h=1.1, dashed=True)
 caption(1.7, 8.05, "see Person A's diagram")
