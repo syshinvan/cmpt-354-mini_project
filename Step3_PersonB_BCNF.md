@@ -190,22 +190,22 @@ Every Step 1 rule for this cluster is enforced in Step 4, but four of them canno
 declarative constraints, because a SQLite CHECK can only see the row being written (there is no
 `CREATE ASSERTION`, and subqueries are not allowed in CHECK). These are enforced by triggers instead:
 
-* **No double-booking of a room** — an event overlapping another event in the same room requires
+- **No double-booking of a room** — an event overlapping another event in the same room requires
   comparing against other Event rows (`Event_No_Overlap_Insert/Update`).
-* **Registrations cannot exceed room capacity** — counts Attends rows against Room.capacity, on
+- **Registrations cannot exceed room capacity** — counts Attends rows against Room.capacity, on
   every path that can break it: new registration, moved registration, event moved to a smaller
   room, room capacity shrunk (`Attends_Capacity`, `Attends_Capacity_Update`, `Event_Room_Capacity`,
   `Room_Capacity_Shrink`).
-* **The supervision chain cannot loop** — the CHECK on Staff blocks only direct self-supervision; a
+- **The supervision chain cannot loop** — the CHECK on Staff blocks only direct self-supervision; a
   longer cycle needs a recursive walk up the chain (`Staff_No_Supervisor_Cycle_Insert/Update`).
-* **At most one head of the library** — "at most one row where supervisorID IS NULL" is not
+- **At most one head of the library** — "at most one row where supervisorID IS NULL" is not
   expressible as a CHECK, and a UNIQUE index does not help because NULLs never compare equal
   (`Staff_Single_Head_Insert/Update`).
 
 What remains genuinely unenforced:
 
-* The *existence* of a head is not guaranteed: the triggers stop a second supervisor-less staff row,
+- The *existence* of a head is not guaranteed: the triggers stop a second supervisor-less staff row,
   but nothing stops deleting the head (or having an empty Staff table), so the schema enforces
   "at most one head", not Step 1's implied "exactly one".
-* SQLite does not enforce `CHAR(n)` lengths (type affinity): the declared widths document intent and
+- SQLite does not enforce `CHAR(n)` lengths (type affinity): the declared widths document intent and
   match Person A's schema, but over-long strings are not rejected.
