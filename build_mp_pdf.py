@@ -4,10 +4,38 @@ markdown writeups and rendered ER diagrams. Run after Step2's ERD scripts.
 """
 import os
 import re
+import sys
 from fpdf import FPDF
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-FONT_DIR = "/opt/anaconda3/pkgs/matplotlib-base-3.9.2-py312h2df2da3_0/lib/python3.12/site-packages/matplotlib/mpl-data/fonts/ttf"
+
+
+def find_font_dir():
+    """Locate a directory holding the DejaVu .ttf fonts: matplotlib's bundled
+    mpl-data/fonts/ttf first, then the usual system font directories."""
+    needed = ["DejaVuSans.ttf", "DejaVuSans-Bold.ttf",
+              "DejaVuSans-Oblique.ttf", "DejaVuSansMono.ttf"]
+    dirs = []
+    try:
+        import matplotlib
+        dirs.append(os.path.join(matplotlib.get_data_path(), "fonts", "ttf"))
+    except ImportError:
+        pass
+    dirs += ["/System/Library/Fonts", "/System/Library/Fonts/Supplemental",
+             "/Library/Fonts", os.path.expanduser("~/Library/Fonts"),
+             "/usr/share/fonts", "/usr/local/share/fonts"]
+    for d in dirs:
+        if all(os.path.isfile(os.path.join(d, f)) for f in needed):
+            return d
+    for d in dirs:  # system font dirs often nest fonts in subdirectories
+        for root, _subdirs, files in os.walk(d):
+            if all(f in files for f in needed):
+                return root
+    sys.exit("error: DejaVu .ttf fonts not found in matplotlib's mpl-data or "
+             "the system font directories searched: " + ", ".join(dirs))
+
+
+FONT_DIR = find_font_dir()
 
 pdf = FPDF()
 pdf.add_font("DejaVu", "", os.path.join(FONT_DIR, "DejaVuSans.ttf"))
@@ -155,7 +183,8 @@ pdf.multi_cell(
     0, 5.6,
     "Notation: rectangle = entity set, double rectangle = weak entity set, oval = attribute "
     "(solid underline = key, dashed underline = partial key), diamond = relationship, double "
-    "diamond = identifying relationship, triangle = isa. Dashed boxes are placeholders marking "
+    "diamond = identifying relationship, double line = total participation, triangle = isa. "
+    "Dashed boxes are placeholders marking "
     "where a relationship crosses into the other half's diagram (captioned accordingly); the two "
     "halves share identical relationship names (DonatedBy, By, Suggested) at every crossing point.",
     align="L",

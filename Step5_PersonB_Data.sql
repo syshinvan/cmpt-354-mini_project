@@ -110,31 +110,41 @@ INSERT INTO Event (eventID, title, description, eventType, eventDate, startTime,
 ('E011', 'One-on-One Tutoring Demo',      'Meet our volunteer tutors; very limited seating.',      'Other',         '2026-08-18', '15:00', '16:00', 'R010'),
 ('E012', 'Indie Film Shorts Evening',     'Six short films from BC filmmakers.',                   'FilmScreening', '2026-08-14', '15:00', '17:00', 'R001');
 
--- ==== AudienceGroup (all 5 rows) ====
--- README §1 fixes this entity set to exactly five groups (Kids/Teens/Adults/Seniors/AllAges),
--- and the CHECK enforces it, so 10 rows are impossible here: the full domain is 5 rows.
+-- ==== AudienceGroup (all 10 rows) ====
+-- Step 1 fixes this entity set to exactly ten groups, and the CHECK enforces it:
+-- these 10 rows are the full domain.
 INSERT INTO AudienceGroup (groupName) VALUES
+('Toddlers'),
 ('Kids'),
+('Tweens'),
 ('Teens'),
 ('Adults'),
 ('Seniors'),
+('Families'),
+('Newcomers'),
+('JobSeekers'),
 ('AllAges');
 
--- ==== RecommendedFor (14 rows) ====
+-- ==== RecommendedFor (19 rows; every audience group is recommended at least one event) ====
 INSERT INTO RecommendedFor (eventID, groupName) VALUES
 ('E001', 'Adults'),
 ('E001', 'Seniors'),
 ('E002', 'AllAges'),
+('E002', 'Families'),
 ('E003', 'Adults'),
 ('E004', 'Teens'),
+('E004', 'Tweens'),
 ('E005', 'Adults'),
+('E005', 'Newcomers'),
 ('E005', 'Seniors'),
 ('E006', 'Kids'),
+('E006', 'Toddlers'),
 ('E007', 'Teens'),
 ('E007', 'Adults'),
 ('E008', 'AllAges'),
 ('E009', 'Seniors'),
 ('E010', 'Adults'),
+('E011', 'JobSeekers'),
 ('E011', 'Teens');
 
 -- ==== Attends (17 rows) ====

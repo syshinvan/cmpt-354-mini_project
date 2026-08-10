@@ -1,9 +1,11 @@
 """
 Step 2 ERD - Person (+3 isa subclasses), Room, Event, AudienceGroup.
 Notation: rectangle=entity, double-rectangle=weak entity, oval=attribute, diamond=relationship,
-double-diamond=identifying relationship, solid/dashed underline=key/partial key.
+double-diamond=identifying relationship, solid/dashed underline=key/partial key,
+double line = total participation.
 Item/Loan/AcquisitionCandidate boxes are dashed placeholders for Person A's domain
-(the three agreed touch-points: DonatedBy, Borrows/By, Suggested).
+(the three agreed touch-points: DonatedBy, Borrows/By, Suggested); By identifies a
+Loan by the Member subclass in the isa hierarchy (Loan.personID references Member).
 Helper functions are shared with Step2_PersonA_ERD.py so both halves render identically.
 """
 import math
@@ -71,7 +73,7 @@ def tri(name, cx, cy, w=1.4, h=1.0):
     ax.text(cx, cy-0.05, 'isa', ha='center', va='center', fontsize=8)
     SHAPES[name] = (cx, cy, w, h, 'rect')
 
-def connect(name1, name2, arrow=False, lw=1.1):
+def connect(name1, name2, arrow=False, lw=1.1, double=False):
     cx1, cy1, w1, h1, k1 = SHAPES[name1]
     cx2, cy2, w2, h2, k2 = SHAPES[name2]
     p1 = _edge_point(cx1, cy1, w1, h1, k1, cx2, cy2)
@@ -79,6 +81,13 @@ def connect(name1, name2, arrow=False, lw=1.1):
     if arrow:
         ax.annotate('', xy=p2, xytext=p1,
                     arrowprops=dict(arrowstyle='-|>', lw=lw+0.3, color='black'), zorder=1)
+    elif double:  # two parallel lines offset perpendicular to the connection
+        dx, dy = p2[0] - p1[0], p2[1] - p1[1]
+        dist = math.hypot(dx, dy)
+        ox, oy = -dy / dist * 0.05, dx / dist * 0.05
+        for s in (1, -1):
+            ax.plot([p1[0] + s * ox, p2[0] + s * ox], [p1[1] + s * oy, p2[1] + s * oy],
+                    color='black', lw=lw, zorder=0)
     else:
         ax.plot([p1[0], p2[0]], [p1[1], p2[1]], color='black', lw=lw, zorder=0)
 
@@ -119,17 +128,19 @@ oval('p_phone', 13.5, 11.3, 'phone');            connect('p_phone', 'Person')
 oval('p_addr', 12.7, 10.4, 'address');           connect('p_addr', 'Person')
 
 # ============ Touch-points with Person A's domain (dashed placeholders) ============
-rect('ItemPh', 1.7, 13.8, 'Item', w=2.0, h=1.0, dashed=True)
+# Loan/By sit in the top slot so By can reach the real Member entity in the isa
+# hierarchy; Item/DonatedBy take the middle slot, level with Person.
+rect('LoanPh', 1.7, 13.8, 'Loan', w=2.0, h=1.0, dashed=True)
 caption(1.7, 13.0, "see Person A's diagram")
-diamond('DonatedBy', 4.5, 13.1, 'DonatedBy', w=2.4, h=1.0)
+diamond('By', 4.0, 13.7, 'By', w=2.2, h=1.0, dbl=True)
+connect('By', 'LoanPh')
+connect('By', 'Member', arrow=True)
+
+rect('ItemPh', 1.7, 11.3, 'Item', w=2.0, h=1.0, dashed=True)
+caption(1.7, 10.5, "see Person A's diagram")
+diamond('DonatedBy', 4.5, 11.5, 'DonatedBy', w=2.4, h=1.0)
 connect('DonatedBy', 'ItemPh')
 connect('DonatedBy', 'Person', arrow=True)
-
-rect('LoanPh', 1.7, 11.3, 'Loan', w=2.0, h=1.0, dashed=True)
-caption(1.7, 10.5, "see Person A's diagram")
-diamond('By', 4.5, 11.5, 'By', w=2.2, h=1.0, dbl=True)
-connect('By', 'LoanPh')
-connect('By', 'Person', arrow=True)
 
 rect('ACPh', 1.7, 8.9, 'Acquisition\nCandidate', w=2.4, h=1.1, dashed=True)
 caption(1.7, 8.05, "see Person A's diagram")
@@ -156,7 +167,7 @@ oval('e_end', 8.9, 3.6, 'endTime');           connect('e_end', 'Event')
 # ============ HeldIn: Event -> Room (many-one, total on Event side) ============
 rect('Room', 16.5, 6.5, 'Room')
 diamond('HeldIn', 12.8, 6.5, 'HeldIn', w=2.3, h=1.0)
-connect('HeldIn', 'Event')
+connect('HeldIn', 'Event', double=True)   # total participation: every event has a room
 connect('HeldIn', 'Room', arrow=True)
 
 oval('r_id', 15.6, 8.2, 'roomID', key=True);  connect('r_id', 'Room')
