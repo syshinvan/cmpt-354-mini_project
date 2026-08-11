@@ -180,11 +180,9 @@ No other attribute in this cluster determines another beyond what's explained by
   block an item from being in two subclasses, but the *total* half (every item is in at least one)
   can't be checked by a trigger here: `Item` and its subclass row are two separate `INSERT`s, so
   there's no single point in time at which a trigger sees both rows to compare.
-- **`Loan.status`/`Fine.status` are not self-maintaining.** Nothing moves a loan from `Active` to
-  `Overdue` as its due date passes, or revisits old rows, so a loan's stored status can drift out
-  of sync with today's date between updates.
-- **`Fine_Requires_Overdue_Loan` compares against `date('now')`**, so whether a loan "is" overdue
-  at insert time depends on the date the database happens to be built, not a fixed fact recorded
-  in the data.
+- **`Loan.status` is synced only at app startup.** The Step 6 app moves past-due `Active` loans
+  to `Overdue` when it connects, so statuses are current for each session — but a loan whose due
+  date passes *while* the app is running, or between direct-SQL accesses that bypass the app,
+  still shows `Active` until the next startup sync.
 - SQLite does not enforce `CHAR(n)` lengths (type affinity): the declared widths document intent
   and match Person B's schema, but over-long strings are not rejected.

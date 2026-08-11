@@ -26,6 +26,16 @@ def connect():
     return conn
 
 
+def sync_overdue_loans(conn):
+    # Nothing else ever moves a loan from Active to Overdue as its due date
+    # passes, so bring stored statuses up to date with today before serving.
+    conn.execute(
+        "UPDATE Loan SET status = 'Overdue' "
+        "WHERE returnDate IS NULL AND status = 'Active' AND dueDate < date('now')"
+    )
+    conn.commit()
+
+
 def next_item_id(cur):
     # Numeric max, not textual: 'IT999' sorts after 'IT1000' as text, which would
     # regenerate an existing ID once past IT999.
@@ -211,6 +221,7 @@ def donate_item(conn, cur):
 
 def main():
     conn = connect()
+    sync_overdue_loans(conn)
     cur = conn.cursor()
     menu = """
 1) Find an item

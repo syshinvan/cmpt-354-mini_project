@@ -11,6 +11,7 @@ import Step6_PersonB_App as person_b
 
 def main():
     conn = person_b.connect()
+    person_a.sync_overdue_loans(conn)
     cur = conn.cursor()
     menu = """
 1) Find an item

@@ -147,7 +147,8 @@ BEGIN
     UPDATE Loan SET status = 'Returned' WHERE itemID = NEW.itemID AND personID = NEW.personID AND loanDate = NEW.loanDate;
 END;
 
--- only allow a Fine on an overdue loan
+-- only allow a Fine on an overdue loan: the loan must already be overdue as of the
+-- fine's own dateIssued (not date('now'), so loading is deterministic on any day)
 CREATE TRIGGER Fine_Requires_Overdue_Loan
 BEFORE INSERT ON Fine
 BEGIN
@@ -156,7 +157,7 @@ BEGIN
             SELECT 1 FROM Loan
             WHERE itemID = NEW.itemID AND personID = NEW.personID AND loanDate = NEW.loanDate
               AND (
-                    (returnDate IS NULL AND dueDate < date('now'))
+                    (returnDate IS NULL AND dueDate < NEW.dateIssued)
                  OR (returnDate IS NOT NULL AND returnDate > dueDate)
               )
         )
