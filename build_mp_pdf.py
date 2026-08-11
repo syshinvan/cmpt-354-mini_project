@@ -47,10 +47,21 @@ pdf.set_margins(18, 18, 18)
 
 
 def clean(text):
-    text = text.replace("`", "")
+    # Protect `code span` contents from the italic pass below: a stray * inside a
+    # code span (e.g. `*_Disjoint`) would otherwise pair up with an unrelated *
+    # elsewhere in the line and italicize everything in between.
+    code_spans = []
+
+    def stash(m):
+        code_spans.append(m.group(1))
+        return f"\x00{len(code_spans) - 1}\x00"
+
+    text = re.sub(r"`([^`]*)`", stash, text)
     # fpdf2's markdown mode only understands **bold** and __italic__; convert
     # lone *italic* markers (not part of a **bold** pair) to that form.
     text = re.sub(r"(?<!\*)\*([^*]+)\*(?!\*)", r"__\1__", text)
+    for i, span in enumerate(code_spans):
+        text = text.replace(f"\x00{i}\x00", span)
     return text
 
 

@@ -51,6 +51,9 @@
 | DonatedBy | Item → Person | many-one | optional (purchased items have none) |
 | Suggested | AcquisitionCandidate → Person | many-one | optional (the suggester may be unknown) |
 
+"Borrows" is the informal name for the Loan weak entity's two identifying relationships on the
+ERDs: `By` (Loan → Member) and `For` (Loan → Item).
+
 ---
 
 ## 5. Team Task Split

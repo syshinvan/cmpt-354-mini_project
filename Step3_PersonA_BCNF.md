@@ -163,3 +163,28 @@ AcquisitionCandidate(candidateID, proposedTitle, format, status, dateProposed, e
 Only one real decomposition was needed (Book split out of PrintBook/OnlineBook); every other
 relation was already in BCNF because its only non-trivial FD already has the full key on the left.
 No other attribute in this cluster determines another beyond what's explained by the primary key.
+
+---
+
+## Known limitations
+
+- **`title` repeats across copies of the same book.** `Item.title` is per-copy, so two `Item`
+  rows sharing an ISBN (two physical copies, or a print/online pair of the same edition) store
+  the same title twice, the same duplication problem `Book` was split out to fix for author and
+  publisher. This is a cross-table dependency (title is really a function of ISBN, not itemID)
+  that a single-relation BCNF analysis doesn't see, since BCNF only looks at FDs within one
+  relation. Documented here as a stated limitation rather than decomposed further, since `title`
+  is also needed for items with no ISBN (Magazine, Journal, Recording).
+- **Total participation of the isa hierarchy is enforced only partway.** Step 1 says every Item
+  is *disjoint and total*: exactly one of the five subclasses. The five `_Disjoint` triggers in Step 4
+  block an item from being in two subclasses, but the *total* half (every item is in at least one)
+  can't be checked by a trigger here: `Item` and its subclass row are two separate `INSERT`s, so
+  there's no single point in time at which a trigger sees both rows to compare.
+- **`Loan.status`/`Fine.status` are not self-maintaining.** Nothing moves a loan from `Active` to
+  `Overdue` as its due date passes, or revisits old rows, so a loan's stored status can drift out
+  of sync with today's date between updates.
+- **`Fine_Requires_Overdue_Loan` compares against `date('now')`**, so whether a loan "is" overdue
+  at insert time depends on the date the database happens to be built, not a fixed fact recorded
+  in the data.
+- SQLite does not enforce `CHAR(n)` lengths (type affinity): the declared widths document intent
+  and match Person B's schema, but over-long strings are not rejected.

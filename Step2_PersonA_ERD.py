@@ -155,7 +155,7 @@ oval('f_status', 14.7, 2.4, 'status');     connect('f_status', 'Fine')
 
 diamond('IncursFine', 11, 5.3, 'Incurs\nFine', dbl=True)
 connect('IncursFine', 'Loan', arrow=True)
-connect('IncursFine', 'Fine')
+connect('IncursFine', 'Fine', arrow=True)  # 1:1 (README §3): an arrowhead on both sides
 
 # ============ AcquisitionCandidate ============
 rect('AC', 20, 9.5, 'Acquisition\nCandidate', w=2.8)
