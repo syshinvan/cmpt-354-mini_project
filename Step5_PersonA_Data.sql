@@ -161,14 +161,6 @@ INSERT INTO Loan (itemID, personID, loanDate, dueDate, returnDate, status) VALUE
 ('IT033','P003','2026-04-15','2026-04-29','2026-05-10','Returned'),
 ('IT006','P004','2026-04-20','2026-05-04','2026-05-20','Returned');
 
--- Loan_Checkout trigger flips every loaned item to CheckedOut; fix items whose
--- loan(s) are all returned back to Available.
-UPDATE Item SET status = 'Available'
-WHERE itemID IN (
-    SELECT itemID FROM Loan GROUP BY itemID
-    HAVING SUM(CASE WHEN returnDate IS NULL THEN 1 ELSE 0 END) = 0
-);
-
 -- ==== Fine (10: one per overdue/late loan above) ====
 INSERT INTO Fine (itemID, personID, loanDate, amountOwed, dateIssued, datePaid, status) VALUES
 ('IT003','P005','2026-05-01',7.50,'2026-07-26',NULL,'Unpaid'),

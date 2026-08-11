@@ -27,9 +27,10 @@ def connect():
 
 
 def next_item_id(cur):
-    cur.execute("SELECT itemID FROM Item ORDER BY itemID DESC LIMIT 1")
-    row = cur.fetchone()
-    n = int(row[0][2:]) + 1 if row else 1
+    # Numeric max, not textual: 'IT999' sorts after 'IT1000' as text, which would
+    # regenerate an existing ID once past IT999.
+    cur.execute("SELECT MAX(CAST(SUBSTR(itemID, 3) AS INTEGER)) FROM Item")
+    n = (cur.fetchone()[0] or 0) + 1
     return f"IT{n:03d}"
 
 
@@ -43,6 +44,7 @@ def find_item(cur):
                     WHEN mg.itemID IS NOT NULL THEN 'Magazine'
                     WHEN jr.itemID IS NOT NULL THEN 'Journal'
                     WHEN rc.itemID IS NOT NULL THEN 'Recording'
+                    ELSE 'Unknown'
                END AS itemType
         FROM Item i
         LEFT JOIN PrintBook  pb ON pb.itemID = i.itemID
@@ -67,8 +69,6 @@ def find_item(cur):
 
 def borrow_item(conn, cur):
     itemID = input("Item ID to borrow: ").strip()
-    personID = input("Your member ID: ").strip()
-
     cur.execute("SELECT status FROM Item WHERE itemID = ?", (itemID,))
     row = cur.fetchone()
     if not row:
@@ -76,6 +76,16 @@ def borrow_item(conn, cur):
         return
     if row[0] != "Available":
         print(f"Item {itemID} is not available (status: {row[0]}).\n")
+        return
+
+    personID = input("Your member ID: ").strip()
+    cur.execute("SELECT membershipStatus FROM Member WHERE personID = ?", (personID,))
+    member = cur.fetchone()
+    if not member:
+        print(f"No member with ID {personID}. (Only members can borrow.)\n")
+        return
+    if member[0] != "Active":
+        print(f"Member {personID}'s membership is {member[0]}, not Active. Cannot borrow.\n")
         return
 
     today = date.today().isoformat()
@@ -130,7 +140,15 @@ def return_item(conn, cur):
 
 def donate_item(conn, cur):
     title = input("Title of the donated item: ").strip()
-    donorID = input("Donor's member ID (leave blank if unknown): ").strip() or None
+    if not title:
+        print("Title cannot be blank.\n")
+        return
+    donorID = input("Donor's person ID (leave blank if unknown): ").strip() or None
+    if donorID is not None:
+        cur.execute("SELECT 1 FROM Person WHERE personID = ?", (donorID,))
+        if not cur.fetchone():
+            print(f"No person with ID {donorID}. (Leave blank if the donor is unknown.)\n")
+            return
 
     print("Item type: 1) PrintBook 2) OnlineBook 3) Magazine 4) Journal 5) Recording")
     choice = input("Choose type: ").strip()
@@ -209,14 +227,25 @@ def main():
     }
     while True:
         print(menu)
-        choice = input("Choose an option: ").strip()
+        try:
+            choice = input("Choose an option: ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print("\nGoodbye!")
+            break
         if choice == "5":
             break
         action = actions.get(choice)
-        if action:
-            action()
-        else:
+        if not action:
             print("Invalid option.\n")
+            continue
+        try:
+            action()
+        except sqlite3.Error as e:
+            conn.rollback()
+            print(f"Database error: {e}\nNothing was changed.\n")
+        except (EOFError, KeyboardInterrupt):
+            conn.rollback()
+            print("\nCancelled; nothing was changed.\n")
     conn.close()
 
 
